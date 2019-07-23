@@ -22,9 +22,9 @@ namespace ReferenceApi.Controllers
         {
             try
             {
-                var allSpecies = this._dataService.GetSpecies();
+                var species = this._dataService.GetSpecies();
 
-                return this.Ok(allSpecies);
+                return this.Ok(species);
             }
             catch (Exception ex)
             {
@@ -64,9 +64,9 @@ namespace ReferenceApi.Controllers
         {
             try
             {
-                var allSpecies = this._dataService.GetSubstances();
+                var substances = this._dataService.GetSubstances();
 
-                return this.Ok(allSpecies);
+                return this.Ok(substances);
             }
             catch (Exception ex)
             {
