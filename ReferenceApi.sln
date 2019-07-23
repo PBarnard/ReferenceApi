@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E93AA4D1-A28C-476F-96A3-26D0FB529CC2}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		readme.md = readme.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReferenceApi.Tests", "ReferenceApi.Tests\ReferenceApi.Tests.csproj", "{6679E19B-5AC8-4321-9FCE-32C6ABB17419}"
