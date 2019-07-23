@@ -1,0 +1,7 @@
+[Bb]in/
+[Oo]bj/
+.vs/
+
+*.csproj.user
+*.sln.DotSettings
+*.sln.DotSettings.user
