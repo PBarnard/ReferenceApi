@@ -24,6 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Feature2.feature">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="ReferenceApi.feature">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
