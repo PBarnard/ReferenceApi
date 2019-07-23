@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Gherkin.Ast;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -31,112 +32,86 @@ namespace ReferenceApi.Tests
         [When(@"I perform a request to the Species endpoint")]
         public void PerformRequestToTheSpeciesEndpoint()
         {
-            this._dataService.Setup(x => x.GetSpecies()).Returns(StubData.GetAllSpecies);
-
-            this._controllerResponse = this._controller.Species();
-
-            Assert.NotNull(this._controllerResponse);
-            this._dataService.VerifyAll();
+            this.SetupAndAssertControllerAllRecords(
+                () => this._controller.Species(), 
+                dataService => dataService.GetSpecies(), 
+                StubData.GetAllSpecies());
         }
 
         [When(@"I perform a request to the PharmaceuticalForm endpoint")]
         public void PerformRequestToThePharmaceuticalFormEndpoint()
         {
-            this._dataService.Setup(x => x.GetPharmaceuticalForms()).Returns(StubData.GetAllPharmaceuticalForms);
-
-            this._controllerResponse = this._controller.PharmaceuticalForm();
-
-            Assert.NotNull(this._controllerResponse);
-            this._dataService.VerifyAll();
+            this.SetupAndAssertControllerAllRecords(
+                () => this._controller.PharmaceuticalForm(), 
+                dataService => dataService.GetPharmaceuticalForms(), 
+                StubData.GetAllPharmaceuticalForms());
         }
 
         [When(@"I perform a request to the Country endpoint")]
         public void PerformRequestToTheCountryEndpoint()
         {
-            this._dataService.Setup(x => x.GetCountries()).Returns(StubData.GetAllCountries);
-
-            this._controllerResponse = this._controller.Countries();
-
-            Assert.NotNull(this._controllerResponse);
-            this._dataService.VerifyAll();
+            this.SetupAndAssertControllerAllRecords(
+                () => this._controller.Countries(), 
+                dataService => dataService.GetCountries(), 
+                StubData.GetAllCountries());
         }
 
         [When(@"I perform a request to the Product endpoint")]
         public void PerformRequestToTheProductEndpoint()
         {
-            this._dataService.Setup(x => x.GetProducts()).Returns(StubData.GetAllProducts);
-
-            this._controllerResponse = this._controller.Product();
-
-            Assert.NotNull(this._controllerResponse);
-            this._dataService.VerifyAll();
+            this.SetupAndAssertControllerAllRecords(
+                () => this._controller.Product(), 
+                dataService => dataService.GetProducts(), 
+                StubData.GetAllProducts());
         }
 
         [When(@"I perform a request to the Substance endpoint")]
         public void PerformRequestToTheSubstanceEndpoint()
         {
-            this._dataService.Setup(x => x.GetSubstances()).Returns(StubData.GetAllSubstances);
-
-            this._controllerResponse = this._controller.Substance();
-
-            Assert.NotNull(this._controllerResponse);
-            this._dataService.VerifyAll();
+            this.SetupAndAssertControllerAllRecords(
+                () => this._controller.Substance(), 
+                dataService => dataService.GetSubstances(), 
+                StubData.GetAllSubstances());
         }
 
         [When(@"I perform a request to the Species endpoint with the identifier '(.*)'")]
         public void PerformRequestToTheSpeciesEndpointWithIdentifier(string identifier)
         {
-            if (!string.IsNullOrWhiteSpace(identifier))
-            {
-                this._dataService.Setup(x => x.GetSpecies()).Returns(StubData.GetAllSpecies);
-            }
-
-            this._controllerResponse = this._controller.SpeciesById(identifier);
-
-            Assert.NotNull(this._controllerResponse);
-            this._dataService.VerifyAll();
+            this.SetupAndAssertControllerSingleRecord(
+                identifier, 
+                id => this._controller.SpeciesById(id), 
+                dataService => dataService.GetSpecies(), 
+                StubData.GetAllSpecies());
         }
 
         [When(@"I perform a request to the PharmaceuticalForm endpoint with the identifier '(.*)'")]
         public void PerformRequestToThePharmaceuticalFormEndpointWithIdentifier(string identifier)
         {
-            if (!string.IsNullOrWhiteSpace(identifier))
-            {
-                this._dataService.Setup(x => x.GetPharmaceuticalForms()).Returns(StubData.GetAllPharmaceuticalForms);
-            }
-
-            this._controllerResponse = this._controller.PharmaceuticalFormById(identifier);
-
-            Assert.NotNull(this._controllerResponse);
-            this._dataService.VerifyAll();
+            this.SetupAndAssertControllerSingleRecord(
+                identifier,
+                id => this._controller.PharmaceuticalFormById(id),
+                dataService => dataService.GetPharmaceuticalForms(),
+                StubData.GetAllPharmaceuticalForms());
         }
 
         [When(@"I perform a request to the Product endpoint with the identifier '(.*)'")]
         public void PerformRequestToTheProductEndpointWithIdentifier(string identifier)
         {
-            if (!string.IsNullOrWhiteSpace(identifier))
-            {
-                this._dataService.Setup(x => x.GetProducts()).Returns(StubData.GetAllProducts);
-            }
-
-            this._controllerResponse = this._controller.ProductById(identifier);
-
-            Assert.NotNull(this._controllerResponse);
-            this._dataService.VerifyAll();
+            this.SetupAndAssertControllerSingleRecord(
+                identifier,
+                id => this._controller.ProductById(id),
+                dataService => dataService.GetProducts(),
+                StubData.GetAllProducts());
         }
 
         [When(@"I perform a request to the Substance endpoint with the identifier '(.*)'")]
         public void PerformRequestToTheSubstanceEndpointWithIdentifier(string identifier)
         {
-            if (!string.IsNullOrWhiteSpace(identifier))
-            {
-                this._dataService.Setup(x => x.GetSubstances()).Returns(StubData.GetAllSubstances);
-            }
-
-            this._controllerResponse = this._controller.SubstanceById(identifier);
-
-            Assert.NotNull(this._controllerResponse);
-            this._dataService.VerifyAll();
+            this.SetupAndAssertControllerSingleRecord(
+                identifier,
+                id => this._controller.SubstanceById(id),
+                dataService => dataService.GetSubstances(),
+                StubData.GetAllSubstances());
         }
 
         [When(@"I request data from the Species endpoint the outcomes are as expected according to the table")]
@@ -313,6 +288,36 @@ namespace ReferenceApi.Tests
 
             Assert.True(data.Id == identifier);
             Assert.True(data.GetType().FullName == modelType.FullName);
+        }
+
+        private void SetupAndAssertControllerAllRecords<T>(
+            Func<ActionResult> controllerAction,
+            Expression<Func<IDataService, IEnumerable<T>>> serviceFunction,
+            IEnumerable<T> serviceOutput)
+        {
+            this._dataService.Setup(serviceFunction).Returns(serviceOutput);
+
+            this._controllerResponse = controllerAction();
+
+            Assert.NotNull(this._controllerResponse);
+            this._dataService.VerifyAll();
+        }
+
+        private void SetupAndAssertControllerSingleRecord<T>(
+            string identifier,
+            Func<string, ActionResult> controllerAction,
+            Expression<Func<IDataService, IEnumerable<T>>> serviceFunction,
+            IEnumerable<T> serviceOutput)
+        {
+            if (!string.IsNullOrWhiteSpace(identifier))
+            {
+                this._dataService.Setup(serviceFunction).Returns(serviceOutput);
+            }
+
+            this._controllerResponse = controllerAction(identifier);
+
+            Assert.NotNull(this._controllerResponse);
+            this._dataService.VerifyAll();
         }
     }
 }
